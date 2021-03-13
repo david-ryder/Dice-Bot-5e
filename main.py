@@ -1,4 +1,5 @@
 import discord
+import time
 import os
 import random
 from replit import db
@@ -21,9 +22,13 @@ async def on_ready():
 @client.event
 async def on_message(message):
   if message.author == client.user:
+    time.sleep(120)
+    await message.delete()
     return
 
   if message.content.startswith('.'): 
+    await message.delete()
+
     length = len(message.content)
 
     pre = -1 # num characters before d
@@ -93,6 +98,10 @@ async def on_message(message):
     final_message += '\n***Total:***   ' + str(total)
 
     await message.channel.send(final_message)
+
+
+
+
 
 
 keep_alive()
