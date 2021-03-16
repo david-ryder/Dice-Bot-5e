@@ -22,8 +22,6 @@ async def on_ready():
 @client.event
 async def on_message(message):
   if message.author == client.user:
-    time.sleep(120)
-    await message.delete()
     return
 
   if message.content.startswith('.'): 
