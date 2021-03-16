@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import time
 import os
 import random
@@ -7,6 +8,7 @@ from keep_alive import keep_alive
 
 
 client = discord.Client()
+
 
 
 def roll(a):
@@ -31,14 +33,23 @@ async def on_message(message):
 
     pre = -1 # num characters before d
 
-    plus = 0
+    plus_index = 0 # stores index value of +/-
+
+    is_plus = False
+    is_minus = False
 
     for x in range(length): # get index value of +, if there is one
       if message.content[x] == '+':
-        plus = x
+        plus_index = x
+        is_plus = True
+        break
+      if message.content[x] == '-':
+        plus_index = x
+        is_minus = True
+        break
 
-    if plus == 0: # if no + in input, default to length
-      plus = length
+    if plus_index == 0: # if no + in input, default to length
+      plus_index = length
 
     for x in range(length): # Gets number of characters before d
       if message.content[x] != 'd':
@@ -55,24 +66,31 @@ async def on_message(message):
 
     die_type = ''
 
-    for x in range(length - post, plus): # get die_type
+    for x in range(length - post, plus_index): # get die_type
       die_type += message.content[x]
 
     addition = ''
 
-    if plus != length: # get value to add to total later
-      for x in range(plus, length):
+    if plus_index != length: # get value to add to total later
+      for x in range(plus_index, length):
         addition += message.content[x]
-
-    if addition:
       addition = int(addition)
-    else:
+    elif plus_index == length:
       addition = 0
+    
 
     arr = []
 
-    for x in range(int(num_rolls)): # execute die roll and store in array
-      arr.append(roll(int(die_type)) + addition)
+    if is_plus:
+      for x in range(int(num_rolls)): # execute die roll and store in array
+        arr.append(roll(int(die_type)) + addition)
+    elif is_minus:
+      for x in range(int(num_rolls)):
+        arr.append(roll(int(die_type)) - addition)
+    else:
+      for x in range(int(num_rolls)):
+        arr.append(roll(int(die_type)))
+    
 
     query = message.content.replace('.','') # delete the command value from the input string
 
@@ -84,9 +102,10 @@ async def on_message(message):
       if x == int(num_rolls) - 1:
         final_message += str(arr[x]) + ')'
       else:
-        final_message += str(arr[x]) + ', '
+        final_message += str(arr[x]) + ','
       if int(die_type) == 20 and arr[x] - addition == 20:
         final_message += '***'
+      final_message += ' '
 
     total = 0
 
@@ -96,9 +115,6 @@ async def on_message(message):
     final_message += '\n***Total:***   ' + str(total)
 
     await message.channel.send(final_message)
-
-
-
 
 
 
