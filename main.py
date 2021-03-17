@@ -1,124 +1,102 @@
 import discord
 from discord.ext import commands
-import time
-import os
 import random
-from replit import db
-from keep_alive import keep_alive
 
+bot = commands.Bot(command_prefix='.')
 
-client = discord.Client()
-
-
-
-def roll(a):
-  num = random.randint(1, a)
-  return num
-
-
-@client.event
+@bot.event
 async def on_ready():
-  print('We have logged in as {0.user}'.format(client))
+    print('Hello!')
 
-
-@client.event
-async def on_message(message):
-  if message.author == client.user:
-    return
-
-  if message.content.startswith('.'): 
-    await message.delete()
-
-    length = len(message.content)
-
-    pre = -1 # num characters before d
-
-    plus_index = 0 # stores index value of +/-
-
-    is_plus = False
-    is_minus = False
-
-    for x in range(length): # get index value of +, if there is one
-      if message.content[x] == '+':
-        plus_index = x
-        is_plus = True
-        break
-      if message.content[x] == '-':
-        plus_index = x
-        is_minus = True
-        break
-
-    if plus_index == 0: # if no + in input, default to length
-      plus_index = length
-
-    for x in range(length): # Gets number of characters before d
-      if message.content[x] != 'd':
-        pre += 1
-      elif message.content[x] == 'd':
-        break
+@bot.command()
+async def roll(ctx, message):
     
+    d_index = 0
+
+    pm_index = 0
+
+    plus = False
+    minus = False
+
+    length = len(message)
+
+    for a in range(len(message)): # parse the input string for d, +/-
+        if message[a] == 'd':
+            d_index = a 
+        if message[a] == '+':
+            pm_index = a
+            length -= pm_index
+            plus = True
+        elif message[a] == '-':
+            pm_index = a
+            length -= pm_index
+            minus = True
+
     num_rolls = ''
 
-    for x in range(1,pre+1): # get num_rolls
-      num_rolls += message.content[x]
+    for a in range(d_index): # get number of rolls
+        num_rolls += message[a]
     
-    post = length - pre - 2
+    num_rolls = int(num_rolls)
 
     die_type = ''
 
-    for x in range(length - post, plus_index): # get die_type
-      die_type += message.content[x]
+    for a in range(d_index + 1, length): # get die type
+        die_type += message[a]
+    
+    die_type = int(die_type)
 
     addition = ''
 
-    if plus_index != length: # get value to add to total later
-      for x in range(plus_index, length):
-        addition += message.content[x]
-      addition = int(addition)
-    elif plus_index == length:
-      addition = 0
-    
+    if plus:
+        for a in range(pm_index + 1, len(message)):
+            addition += message[a]
+        addition = int(addition)
+    elif minus:
+        for a in range(pm_index + 1, len(message)):
+            addition += message[a]
+        addition = 0 - int(addition)
+    else:
+        addition = 0
 
     arr = []
 
-    if is_plus:
-      for x in range(int(num_rolls)): # execute die roll and store in array
-        arr.append(roll(int(die_type)) + addition)
-    elif is_minus:
-      for x in range(int(num_rolls)):
-        arr.append(roll(int(die_type)) - addition)
-    else:
-      for x in range(int(num_rolls)):
-        arr.append(roll(int(die_type)))
+    for a in range(num_rolls): # fill array with random values according to the die type
+        arr.append((random.randint(1,die_type)) + addition)
     
+    final_message = ctx.message.author.mention + '\n***Rolling ' + message + ':***   ('
 
-    query = message.content.replace('.','') # delete the command value from the input string
-
-    final_message = message.author.mention + '\n***Rolling ' + query + ':***   ('
-
-    for x in range(int(num_rolls)):
-      if int(die_type) == 20 and arr[x] - addition == 20:
-        final_message += '***'
-      if x == int(num_rolls) - 1:
-        final_message += str(arr[x]) + ')'
-      else:
-        final_message += str(arr[x]) + ','
-      if int(die_type) == 20 and arr[x] - addition == 20:
-        final_message += '***'
-      final_message += ' '
-
+    for x in range(int(num_rolls)): # build final message, bold crits
+        if int(die_type) == 20 and arr[x] - addition == 20:
+            final_message += '***'
+        if x == int(num_rolls) - 1:
+            final_message += str(arr[x]) + ')'
+        else:
+            final_message += str(arr[x]) + ','
+        if int(die_type) == 20 and arr[x] - addition == 20:
+            final_message += '***'
+        final_message += ' '
+    
     total = 0
 
-    for x in range(int(num_rolls)):
-      total += arr[x]
+    for x in range(int(num_rolls)): # calculate the total die roll
+        total += arr[x]
     
     final_message += '\n***Total:***   ' + str(total)
 
-    await message.channel.send(final_message)
+    await ctx.send(final_message) # send final message
+
+    
+    
+
+    
 
 
 
-keep_alive()
 
+        
 
-client.run(os.getenv('TOKEN'))
+            
+    
+
+bot.run(TOKEN)
