@@ -4,16 +4,18 @@ import random
 
 bot = commands.Bot(command_prefix='.')
 
+TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.jc4nC4ZiaMm-WNl1uMsXQnd-qXo'
+
 @bot.event
 async def on_ready():
     print('Hello!')
 
 @bot.command()
 async def roll(ctx, message):
-    
+
     d_index = 0
 
-    pm_index = 0
+    pm_index = len(message)
 
     plus = False
     minus = False
@@ -41,7 +43,7 @@ async def roll(ctx, message):
 
     die_type = ''
 
-    for a in range(d_index + 1, length): # get die type
+    for a in range(d_index + 1, pm_index): # get die type
         die_type += message[a]
     
     die_type = int(die_type)
@@ -86,17 +88,11 @@ async def roll(ctx, message):
 
     await ctx.send(final_message) # send final message
 
+@bot.command()
+async def clear(ctx, num):
+    num = int(num)
+    await ctx.channel.purge(limit=num)
     
-    
-
-    
-
-
-
-
-        
-
-            
     
 
 bot.run(TOKEN)
