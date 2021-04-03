@@ -1,6 +1,7 @@
 import os
 import discord
 import pymongo
+from pymongo import MongoClient
 from discord.ext import commands
 import random
 import pdfshid
@@ -11,6 +12,14 @@ bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.')
 
+TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.LZaIscrcC0kSTVemD0acGniWJMA'
+
+client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
+
+db = client.dndbot
+
+characters = db.characters
+
 @bot.event
 async def on_ready():
     print('Hello!')
@@ -19,8 +28,72 @@ async def on_ready():
 async def roll(ctx, message):
 
     await clear(ctx, 1)
+
+    if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'ssave' or message == 'dsave' or message == 'csave' or message == 'isave' or message == 'wsave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival':
+        cursor = db.characters.find({'_id':str(ctx.message.author.id)})
+
+        for characters in cursor:
+            stat = characters[message]
+
+        final_message = ctx.author.mention + '\n***Rolling ' + message + ':***   ('
+
+        if '+' in stat:
+            index = stat.find('+')
+
+            result = random.randint(1,20)
+
+            total = result + int(stat[index:])
+
+            if result == 20 or result == 1:
+                final_message += '***'
+
+            final_message += str(total)
+
+            if result == 20 or result == 1:
+                final_message += '***'
+
+            final_message += ')'
+
+        elif '-' in stat:
+            index = stat.find('-')
+
+            result = random.randint(1,20)
+            
+            subtraction = 0 - int(stat[index:])
+
+            total = result - subtraction
+
+            if result == 20 or result == 1:
+                final_message += '***'
+
+            final_message += str(total)
+
+            if result == 20 or result == 1:
+                final_message += '***'
+                
+            final_message += ')'
+
+        else:
+            result = random.randint(1,20)
+
+            total = result
+
+            if result == 20 or result == 1:
+                final_message += '***'
+
+            final_message += str(total)
+
+            if result == 20 or result == 1:
+                final_message += '***'
+
+            final_message += ')'
+
+        await ctx.channel.send(final_message)
+        
+        return
+
     
-    d_index = 0
+    d_index = message.find('d')
 
     pm_index = len(message)
 
@@ -29,17 +102,15 @@ async def roll(ctx, message):
 
     length = len(message)
 
-    for a in range(len(message)): # parse the input string for d, +/-
-        if message[a] == 'd':
-            d_index = a 
-        if message[a] == '+':
-            pm_index = a
-            length -= pm_index
-            plus = True
-        elif message[a] == '-':
-            pm_index = a
-            length -= pm_index
-            minus = True
+    if '+' in message:
+        pm_index = message.find('+')
+        plus = True
+        length -= pm_index
+
+    if '-' in message:
+        pm_index = message.find('-')
+        minus = True
+        length -= pm_index
 
     num_rolls = ''
 
@@ -76,13 +147,13 @@ async def roll(ctx, message):
     final_message = ctx.message.author.mention + '\n***Rolling ' + message + ':***   ('
 
     for x in range(int(num_rolls)): # build final message, bold crits
-        if int(die_type) == 20 and arr[x] - addition == 20:
+        if (int(die_type) == 20 and arr[x] - addition == 20) or (int(die_type) == 20 and arr[x] - addition == 1):
             final_message += '***'
         if x == int(num_rolls) - 1:
             final_message += str(arr[x]) + ')'
         else:
             final_message += str(arr[x]) + ','
-        if int(die_type) == 20 and arr[x] - addition == 20:
+        if (int(die_type) == 20 and arr[x] - addition == 20) or (int(die_type) == 20 and arr[x] - addition == 1):
             final_message += '***'
         final_message += ' '
     
@@ -114,12 +185,18 @@ async def upload(ctx):
 
     post_pdf = pdfshid.fileOpen('file.pdf')
 
-    pdfshid.fillSheet(post_pdf)
+    user_id = ctx.message.author.id
+
+    pdfshid.fillSheet(post_pdf, user_id)
 
     f.close()
 
     post_pdf.close()
 
     os.remove(post_pdf.name)
-    
+
+    await ctx.channel.send('Character successfully uploaded!')
+
+
+
 bot.run(TOKEN)
