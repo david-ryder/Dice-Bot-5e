@@ -1,5 +1,6 @@
 import pymongo
 import json
+import os
 
 # opens character sheet
 def fileOpen (filename): # opens the entered file name
@@ -585,3 +586,7 @@ def fillSheet(input_file):
     again = open(filename, 'r')
 
     uploadSheet(again)
+
+    again.close()
+
+    os.remove(filename)
