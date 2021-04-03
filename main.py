@@ -1,3 +1,4 @@
+import os
 import discord
 import pymongo
 from discord.ext import commands
@@ -114,5 +115,11 @@ async def upload(ctx):
     post_pdf = pdfshid.fileOpen('file.pdf')
 
     pdfshid.fillSheet(post_pdf)
+
+    f.close()
+
+    post_pdf.close()
+
+    os.remove(post_pdf.name)
     
 bot.run(TOKEN)
