@@ -1,10 +1,14 @@
 import discord
+import pymongo
 from discord.ext import commands
 import random
+import pdfshid
+import urllib
+from urllib.request import Request, urlopen
+
+bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.')
-
-TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.jc4nC4ZiaMm-WNl1uMsXQnd-qXo'
 
 @bot.event
 async def on_ready():
@@ -13,6 +17,8 @@ async def on_ready():
 @bot.command()
 async def roll(ctx, message):
 
+    await clear(ctx, 1)
+    
     d_index = 0
 
     pm_index = len(message)
@@ -92,7 +98,21 @@ async def roll(ctx, message):
 async def clear(ctx, num):
     num = int(num)
     await ctx.channel.purge(limit=num)
-    
-    
 
+@bot.command()
+async def upload(ctx):
+    attachment = ctx.message.attachments[0]
+    site = attachment.url # get url to file from message
+
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(url=site, headers=hdr)
+    empty_pdf = urlopen(req).read()
+
+    f = open('file.pdf', 'wb')
+    f.write(empty_pdf)
+
+    post_pdf = pdfshid.fileOpen('file.pdf')
+
+    pdfshid.fillSheet(post_pdf)
+    
 bot.run(TOKEN)
