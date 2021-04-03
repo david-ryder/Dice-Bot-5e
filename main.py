@@ -12,6 +12,8 @@ bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.')
 
+TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.aNODbwCcM8zQfbxxPw0cUX_PJIs'
+
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
 db = client.dndbot
@@ -192,6 +194,8 @@ async def upload(ctx):
     post_pdf.close()
 
     os.remove(post_pdf.name)
+
+    await clear(ctx, 2)
 
     await ctx.channel.send('Character successfully uploaded!')
 
