@@ -1,3 +1,6 @@
+import time
+from replit import db
+from keep_alive import keep_alive
 import os
 import discord
 import pymongo
@@ -20,12 +23,14 @@ characters = db.characters
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game('.help'))
     print('Hello!')
+    
 
 @bot.command()
 async def roll(ctx, message):
 
-    await clear(ctx, 1)
+    await ctx.channel.purge(limit=1)
 
     if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
         cursor = db.characters.find({'_id':str(ctx.message.author.id)})
@@ -239,6 +244,8 @@ async def uploadhelp(ctx):
 
 @bot.command()
 async def help(ctx):
+
+    await ctx.channel.purge(limit=1)
     
     final_message = ctx.author.mention + '```\n-- Available commands: --\n\n'
     final_message += '.roll | rolls dice\n'
@@ -247,4 +254,6 @@ async def help(ctx):
     final_message += 'If I do not respond with a message, then something went wrong!```'
     await ctx.channel.send(final_message)
 
-bot.run(TOKEN)
+keep_alive()
+
+bot.run(os.getenv('TOKEN'))
