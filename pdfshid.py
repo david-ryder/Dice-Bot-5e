@@ -28,13 +28,14 @@ def uploadSheet(text_doc):
         for line in f:
             attribute, value = line.strip().split()
             dict1[attribute] = value.strip()
-    
+
+    characters.remove(spec_or_id=dict1['_id'])
+
     characters.insert_one(dict1)
 
 
-
 # parses character sheet for rollable information
-def fillSheet(input_file):
+def fillSheet(input_file, user_id):
     
     substring = 'CharacterName)/Type/Annot/V(' # get character name
 
@@ -55,7 +56,7 @@ def fillSheet(input_file):
 
     out_file = open(filename, 'w')
 
-    out_file.write('name ' + matched_line + '\n')
+    out_file.write('_id ' + str(user_id) + '\n')
 
     substring = 'STRmod)/Type/Annot/V(' # get STR mod
 
@@ -176,7 +177,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('strength_save ' + matched_line + '\n')
+    out_file.write('ssave ' + matched_line + '\n')
 
     substring = 'ST Dexterity)/Type/Annot/V(' # get DEX save
 
@@ -193,7 +194,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('dexterity_save ' + matched_line + '\n')
+    out_file.write('dsave ' + matched_line + '\n')
 
     substring = 'ST Constitution)/Type/Annot/V(' # get CON save
 
@@ -210,7 +211,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('constitution_save ' + matched_line + '\n')
+    out_file.write('csave ' + matched_line + '\n')
 
     substring = 'ST Intelligence)/Type/Annot/V(' # get INT save
 
@@ -227,7 +228,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('intelligence_save ' + matched_line + '\n')
+    out_file.write('isave ' + matched_line + '\n')
 
     substring = 'ST Wisdom)/Type/Annot/V(' # get WIS save
 
@@ -244,7 +245,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('wisdom_save ' + matched_line + '\n')
+    out_file.write('wsave ' + matched_line + '\n')
 
     substring = 'ST Charisma)/Type/Annot/V(' # get CHA save
 
@@ -261,7 +262,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('charisma_save ' + matched_line + '\n')
+    out_file.write('csave ' + matched_line + '\n')
 
     input_file.seek(0)
 
@@ -297,7 +298,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('animal_handling ' + matched_line + '\n')
+    out_file.write('animalhandling ' + matched_line + '\n')
 
     substring = 'Arcana)/Type/Annot/V(' # get Arcana skill
 
@@ -543,7 +544,7 @@ def fillSheet(input_file):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('sleight_of_hand ' + matched_line + '\n')
+    out_file.write('sleightofhand ' + matched_line + '\n')
 
     input_file.seek(0)
 
