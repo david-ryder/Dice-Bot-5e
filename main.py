@@ -12,6 +12,8 @@ bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.')
 
+TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.oNUSOFoqEaQRj6BcWKe7aZpTyVs'
+
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
 db = client.dndbot
@@ -27,9 +29,9 @@ async def roll(ctx, message):
 
     await clear(ctx, 1)
 
-    if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'ssave' or message == 'dsave' or message == 'csave' or message == 'isave' or message == 'wsave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival':
+    if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival':
         cursor = db.characters.find({'_id':str(ctx.message.author.id)})
-
+        
         for characters in cursor:
             stat = characters[message]
 
@@ -90,7 +92,7 @@ async def roll(ctx, message):
         
         return
 
-    
+
     d_index = message.find('d')
 
     pm_index = len(message)
@@ -195,7 +197,9 @@ async def upload(ctx):
 
     await clear(ctx, 2)
 
-    await ctx.channel.send('Character successfully uploaded!')
+    final_message = ctx.author.mention + '\nCharacter succeddfully uploaded!'
+
+    await ctx.channel.send(final_message)
 
 
 
