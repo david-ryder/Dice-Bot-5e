@@ -10,9 +10,7 @@ from urllib.request import Request, urlopen
 
 bot = discord.Client()
 
-bot = commands.Bot(command_prefix='.')
-
-TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.oNUSOFoqEaQRj6BcWKe7aZpTyVs'
+bot = commands.Bot(command_prefix='.', help_command=None)
 
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
@@ -29,7 +27,7 @@ async def roll(ctx, message):
 
     await clear(ctx, 1)
 
-    if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival':
+    if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
         cursor = db.characters.find({'_id':str(ctx.message.author.id)})
         
         for characters in cursor:
@@ -167,12 +165,35 @@ async def roll(ctx, message):
     await ctx.send(final_message) # send final message
 
 @bot.command()
+async def rollhelp(ctx):
+
+    await ctx.channel.purge(limit=1)
+
+    message = ctx.author.mention + '```-- Roll command --\n\n'
+    message += 'Simple die rolls - enter .roll <XdY> | example: .roll 2d20 will roll 2 20 sided dice\n\n'
+    message += 'Modified rolls - enter .roll <XdY><+/-><value> | example: .roll 3d4+5 will roll 3 4 sided dice, and then add 5 to each result\n\n'
+    message += 'Character rolls - enter .roll <stat> | example: .roll initiative will roll a 20 sided die and add your initiative modifier to the result\n\n'
+    message += '- For saving throws, enter the first 3 letters of the associated stat, followed by save | example: .roll consave will roll a constitution saving throw\n'
+    message += '- For skills/abilities, enter the name of the stat you want to roll, ignoring spaces | example: .roll animalhandling will roll an animal handling check```'
+    await ctx.channel.send(message)
+
+@bot.command()
 async def clear(ctx, num):
+
+    if ctx.message.author.id != 391638053367840771:
+        return
+
+    await ctx.channel.purge(limit=1)
+
     num = int(num)
+
     await ctx.channel.purge(limit=num)
+
+    return
 
 @bot.command()
 async def upload(ctx):
+
     attachment = ctx.message.attachments[0]
     site = attachment.url # get url to file from message
 
@@ -201,6 +222,29 @@ async def upload(ctx):
 
     await ctx.channel.send(final_message)
 
+@bot.command()
+async def uploadhelp(ctx):
 
+    await ctx.channel.purge(limit=1)
+
+    message = ctx.author.mention + '```-- Upload command --\n\n'
+    message += 'Upload your character sheet to Discord. When Discord asks you for a comment before sending, enter .upload\n\n'
+    message += 'REQUIREMENTS:\n'
+    message += '- Character sheet must be the official Wizards of the Coast 5e fillable pdf\n'
+    message += '- All stat modifiers and ability scores must be filled - including initiative, saving throws, and skills\n'
+    message += '- Every filled modifier must contain either a + or - before its value | example: +1 for performance skill\n\n'
+    message += 'If upload successful, a message will be sent to confirm!```'
+    await ctx.channel.send(message)
+
+
+@bot.command()
+async def help(ctx):
+    
+    final_message = ctx.author.mention + '```\n-- Available commands: --\n\n'
+    final_message += '.roll | rolls dice\n'
+    final_message += '.upload | uploads character sheet to database so it can be paired with .roll command\n\n'
+    final_message += 'Enter .<command>help for help with a specific command | example: .rollhelp\n\n'
+    final_message += 'If I do not respond with a message, then something went wrong!```'
+    await ctx.channel.send(final_message)
 
 bot.run(TOKEN)
