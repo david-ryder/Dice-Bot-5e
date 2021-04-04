@@ -15,6 +15,8 @@ bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 
+TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.Bbrjq8hb7EOlQwevjgkKdleQ71M'
+
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
 db = client.dndbot
@@ -32,13 +34,17 @@ async def roll(ctx, message):
 
     await ctx.channel.purge(limit=1)
 
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
     embed = discord.Embed(title=('-- Rolling ' + message + ' --'), color=65535)
 
     if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
-        cursor = db.characters.find({'_id':str(ctx.message.author.id)})
         
-        for characters in cursor:
-            stat = characters[message]
+        if user == None:
+            await ctx.send(ctx.author.mention + '\nSorry! Looks like you haven\'t uploaded a character sheet yet!')
+            return
+
+        stat = user[message]
 
         final_message = '('
 
@@ -124,25 +130,41 @@ async def roll(ctx, message):
     for a in range(d_index): # get number of rolls
         num_rolls += message[a]
     
-    num_rolls = int(num_rolls)
+    try:
+        num_rolls = int(num_rolls)
+    except ValueError:
+        await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+        return
 
     die_type = ''
 
     for a in range(d_index + 1, pm_index): # get die type
         die_type += message[a]
     
-    die_type = int(die_type)
+    try:
+        die_type = int(die_type)
+    except ValueError:
+        await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+        return
 
     addition = ''
 
     if plus:
-        for a in range(pm_index + 1, len(message)):
-            addition += message[a]
-        addition = int(addition)
+        try:
+            for a in range(pm_index + 1, len(message)):
+                addition += message[a]
+            addition = int(addition)
+        except ValueError:
+            await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+            return
     elif minus:
-        for a in range(pm_index + 1, len(message)):
-            addition += message[a]
-        addition = 0 - int(addition)
+        try:
+            for a in range(pm_index + 1, len(message)):
+                addition += message[a]
+            addition = 0 - int(addition)
+        except ValueError:
+            await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+            return
     else:
         addition = 0
 
@@ -205,7 +227,14 @@ async def clear(ctx, num):
 @bot.command()
 async def upload(ctx):
 
-    attachment = ctx.message.attachments[0]
+    await clear(ctx, 0)
+
+    try:
+        attachment = ctx.message.attachments[0]
+    except IndexError:
+        await ctx.send(ctx.author.mention + '\nWhoops! Something went wrong!')
+        return
+
     site = attachment.url # get url to file from message
 
     hdr = {'User-Agent': 'Mozilla/5.0'}
@@ -219,7 +248,11 @@ async def upload(ctx):
 
     user_id = ctx.message.author.id
 
-    pdfshid.fillSheet(post_pdf, user_id)
+    try:
+        pdfshid.fillSheet(post_pdf, user_id)
+    except ValueError:
+        await ctx.send(ctx.author.mention + '\nSomething is wrong with the file!')
+        return
 
     f.close()
 
@@ -227,11 +260,17 @@ async def upload(ctx):
 
     os.remove(post_pdf.name)
 
-    await clear(ctx, 2)
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None:
+        await ctx.send(ctx.author.mention + '\nWhoops! Something went wrong!')
+        return
 
     final_message = ctx.author.mention + '\nCharacter successfully uploaded!'
 
     await ctx.channel.send(final_message)
+
+    return
 
 @bot.command()
 async def uploadhelp(ctx):
@@ -244,6 +283,14 @@ async def uploadhelp(ctx):
     embed.add_field(name='If upload is successful:', value='A message will be sent to confirm!', inline=False)
     await ctx.channel.send(embed=embed)
 
+@bot.command()
+async def attack(ctx, weapon):
+
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None:
+        await ctx.send(ctx.author.mention + '\nSorry! Looks like you haven\'t uploaded a character sheet yet!')
+        return
 
 @bot.command()
 async def help(ctx):
