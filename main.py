@@ -15,7 +15,6 @@ bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 
-TOKEN = 'ODIxNjAyOTE0MTE1NTE4NDc1.YFGHVw.Bbrjq8hb7EOlQwevjgkKdleQ71M'
 
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
@@ -28,7 +27,6 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game('.help'))
     print('Hello!')
     
-
 @bot.command()
 async def roll(ctx, message):
 
@@ -36,7 +34,10 @@ async def roll(ctx, message):
 
     user = db.characters.find_one({'_id':str(ctx.message.author.id)})
 
-    embed = discord.Embed(title=('-- Rolling ' + message + ' --'), color=65535)
+    if user == None:
+        embed = discord.Embed(title=('-- ' + ctx.author.name + ' rolls ' + message + ' --'), color=65535)
+    else:
+        embed = discord.Embed(title=('-- ' + user['name'] + ' rolls ' + message + ' --'), color=65535)
 
     if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
         
@@ -101,7 +102,7 @@ async def roll(ctx, message):
         
         embed.add_field(name='Result', value=final_message)
 
-        await ctx.channel.send(ctx.author.mention, embed=embed)
+        await ctx.channel.send(embed=embed)
         
         return
 
@@ -133,7 +134,7 @@ async def roll(ctx, message):
     try:
         num_rolls = int(num_rolls)
     except ValueError:
-        await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+        await ctx.send(ctx.author.mention + '\nWhoops! That was an invalid entry')
         return
 
     die_type = ''
@@ -144,7 +145,7 @@ async def roll(ctx, message):
     try:
         die_type = int(die_type)
     except ValueError:
-        await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+        await ctx.send(ctx.author.mention + '\nWhoops! That was an invalid entry')
         return
 
     addition = ''
@@ -163,7 +164,7 @@ async def roll(ctx, message):
                 addition += message[a]
             addition = 0 - int(addition)
         except ValueError:
-            await ctx.send(ctx.author.mention + '\nWhoops! That\'s an invalid entry')
+            await ctx.send(ctx.author.mention + '\nWhoops! That was an invalid entry')
             return
     else:
         addition = 0
@@ -195,17 +196,17 @@ async def roll(ctx, message):
 
     embed.add_field(name='Total', value=str(total))
 
-    await ctx.send(ctx.message.author.mention, embed=embed) # send final message
+    await ctx.send(embed=embed) # send final message
 
 @bot.command()
 async def rollhelp(ctx):
 
     await ctx.channel.purge(limit=1)
 
-    embed = discord.Embed(title='-- Roll command --', color=discord.Color(65535))
-    embed.add_field(name='Simple die rolls', value='Enter .roll XdY\nExample: .roll 2d20 will roll 2 20 sided dice', inline=False)
-    embed.add_field(name='Modified rolls', value='Enter .roll XdY(+/-)number\nExample: .roll 3d4+5 will roll 3 4 sided dice, and then add 5 to each result', inline=False)
-    embed.add_field(name='Character rolls', value='Enter .roll stat\nExample: .roll initiative will roll a 20 sided die and add your initiative modifier to the result\n\nFor saving throws, enter the first 3 letters of the associated stat, followed by save\n- Example: .roll consave will roll a constitution saving throw\n\nFor skills/abilities, enter the name of the stat you want to roll, ignoring spaces\n- Example: .roll animalhandling will roll an animal handling check', inline=False)
+    embed = discord.Embed(title='-- Roll command help --', color=discord.Color(65535))
+    embed.add_field(name='Simple die rolls', value='Enter .roll XdY\n- example: .roll 2d20 will roll 2 20 sided dice', inline=False)
+    embed.add_field(name='Modified rolls', value='Enter .roll XdY(+/-)number\n- example: .roll 3d4+5 will roll 3 4 sided dice, and then add 5 to each result', inline=False)
+    embed.add_field(name='Character rolls', value='Enter .roll stat\n- example: .roll initiative will roll a 20 sided die and add your initiative modifier to the result\n\nFor saving throws, enter the first 3 letters of the associated stat, followed by save\n- example: .roll consave will roll a constitution saving throw\n\nFor skills/abilities, enter the name of the stat you want to roll, ignoring spaces\n- example: .roll animalhandling will roll an animal handling check', inline=False)
     embed.add_field(name='Critical success/failures', value='These values will be bolded')
 
     await ctx.channel.send(embed=embed)
@@ -227,12 +228,12 @@ async def clear(ctx, num):
 @bot.command()
 async def upload(ctx):
 
-    await clear(ctx, 0)
+    await ctx.channel.purge(limit=1)
 
     try:
         attachment = ctx.message.attachments[0]
     except IndexError:
-        await ctx.send(ctx.author.mention + '\nWhoops! Something went wrong!')
+        await ctx.send(ctx.author.mention + '\nOops! You forgot to send your attachment sheet before running the upload command!')
         return
 
     site = attachment.url # get url to file from message
@@ -251,7 +252,7 @@ async def upload(ctx):
     try:
         pdfshid.fillSheet(post_pdf, user_id)
     except ValueError:
-        await ctx.send(ctx.author.mention + '\nSomething is wrong with the file!')
+        await ctx.send(ctx.author.mention + '\nSomething is wrong with the uploaded file!')
         return
 
     f.close()
@@ -266,7 +267,7 @@ async def upload(ctx):
         await ctx.send(ctx.author.mention + '\nWhoops! Something went wrong!')
         return
 
-    final_message = ctx.author.mention + '\nCharacter successfully uploaded!'
+    final_message = ctx.author.mention + '\nSuccessfully uploaded ' + user['name'] + '\'s character sheet!'
 
     await ctx.channel.send(final_message)
 
@@ -277,20 +278,24 @@ async def uploadhelp(ctx):
 
     await ctx.channel.purge(limit=1)
 
-    embed = discord.Embed(title='-- Upload command --', color=discord.Color(65535))
+    embed = discord.Embed(title='-- Upload command help --', color=discord.Color(65535))
     embed.add_field(name='Instructions', value=('1. Character sheet must be the official Wizards of the Coast 5e fillable pdf:\n' + 'https://media.wizards.com/2016/dnd/downloads/5E_CharacterSheet_Fillable.pdf' + '\n2.  Upload your character sheet to Discord\n3.  When Discord asks you for a comment before sending, enter .upload\n\n'), inline=False  )
-    embed.add_field(name='Requirements', value=('\n- All stat modifiers and ability scores must be filled including initiative, saving throws, and skills\n- Every filled modifier must contain either a + or - before its value\nexample: +1 for performance skill'), inline=False)
+    embed.add_field(name='Requirements', value=('\n- Character name,stat modifiers, initiative, saving throws, and skills must all be filled on the character sheet\n- Every filled modifier must contain a + or - before its value'), inline=False)
     embed.add_field(name='If upload is successful:', value='A message will be sent to confirm!', inline=False)
     await ctx.channel.send(embed=embed)
 
+
+
+
+
 @bot.command()
-async def attack(ctx, weapon):
+async def colorhelp(ctx):
+    
+    embed = discord.Embed(title='-- Color command help --', color=discord.Color(65535))
+    embed.add_field(name='Instructions', value='1. Enter .color\n2. Wait for bot to send another message\n3. Click the reaction with the color that you want the bot messages to change to', inline=False)
+    
+    await ctx.send(embed=embed)
 
-    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
-
-    if user == None:
-        await ctx.send(ctx.author.mention + '\nSorry! Looks like you haven\'t uploaded a character sheet yet!')
-        return
 
 @bot.command()
 async def help(ctx):
@@ -300,8 +305,7 @@ async def help(ctx):
     embed = discord.Embed(title='-- Available commands --', color=discord.Color(65535))
     embed.add_field(name='.roll', value='Rolls dice', inline=False)
     embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats', inline=False)
-    embed.add_field(name='.commandhelp', value='Replace \'command\' with the name of the command you want to learn about\nexample: .rollhelp', inline=False)
-    embed.add_field(name='Important!', value='If I do not respond with a message, then something went wrong!')
+    embed.add_field(name='.commandhelp', value='Replace \'command\' with the name of the command you want to learn about\n- example: .rollhelp', inline=False)
 
     await ctx.channel.send(embed=embed)
 
