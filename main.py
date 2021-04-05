@@ -50,15 +50,28 @@ async def roll(ctx, message):
 
     user = db.characters.find_one({'_id':str(ctx.message.author.id)})
 
-    embed = discord.Embed(title=('-- Rolling ' + message + ' --'))
+    try:
+      user_color = color_dict[user['color']]
+    except:
+      user_color = color_dict['black']
+
+    try:
+      name = user['name']
+    except:
+      name = ctx.author.name
+
+    embed = discord.Embed(title=('-- ' + name + ' rolls ' + message + ' --'), color=user_color)
 
     if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
         
         if user == None:
             await ctx.send(ctx.author.mention + '\nSorry! Looks like you haven\'t uploaded a character sheet yet!')
             return
-
-        stat = user[message]
+        try:
+          stat = user[message]
+        except:
+          await ctx.send(ctx.author.mention + '\nSorry! Looks like you haven\'t uploaded a character sheet yet!')
+          return
 
         final_message = '('
 
