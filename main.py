@@ -2,19 +2,20 @@ import time
 from replit import db
 from keep_alive import keep_alive
 import os
-import discord
-import pymongo
-from pymongo import MongoClient
-from discord.ext import commands
 import random
-import pdfshid
 import urllib
 from urllib.request import Request, urlopen
+
+import discord
+import pymongo
+from discord.ext import commands
+from pymongo import MongoClient
+
+import pdfshid
 
 bot = discord.Client()
 
 bot = commands.Bot(command_prefix='.', help_command=None)
-
 
 client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
@@ -22,11 +23,26 @@ db = client.dndbot
 
 characters = db.characters
 
+color_dict = {
+    'red': discord.Color.red(),
+    'orange': discord.Color.orange(),
+    'green': discord.Color.green(),
+    'blue': discord.Color.blue(),
+    'purple': discord.Color.purple(),
+    'gold': discord.Color.gold(),
+    'blurple': discord.Color.blurple(),
+    'gray': discord.Color.greyple(),
+    'magenta': discord.Color.magenta(),
+    'teal': discord.Color.teal(),
+    'black': discord.Color.default()
+}
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game('.help'))
     print('Hello!')
     
+
 @bot.command()
 async def roll(ctx, message):
 
@@ -34,10 +50,7 @@ async def roll(ctx, message):
 
     user = db.characters.find_one({'_id':str(ctx.message.author.id)})
 
-    if user == None:
-        embed = discord.Embed(title=('-- ' + ctx.author.name + ' rolls ' + message + ' --'), color=65535)
-    else:
-        embed = discord.Embed(title=('-- ' + user['name'] + ' rolls ' + message + ' --'), color=65535)
+    embed = discord.Embed(title=('-- Rolling ' + message + ' --'))
 
     if message == 'strength' or message == 'dexterity' or message == 'constitution' or message == 'intelligence' or message == 'wisdom' or message == 'charisma' or message == 'strsave' or message == 'dexsave' or message == 'consave' or message == 'intsave' or message == 'wissave' or message == 'chasave' or message == 'acrobatics' or message == 'animalhandling' or message == 'arcana' or message == 'athletics' or message == 'deception' or message == 'history' or message == 'insight' or message == 'intimidation' or message == 'investigation' or message == 'medicine' or message == 'nature' or message == 'perception' or message == 'performance' or message == 'persuasion' or message == 'religion' or message == 'sleightofhand' or message == 'stealth' or message == 'survival' or message == 'initiative':
         
@@ -198,12 +211,19 @@ async def roll(ctx, message):
 
     await ctx.send(embed=embed) # send final message
 
+
 @bot.command()
 async def rollhelp(ctx):
 
     await ctx.channel.purge(limit=1)
 
-    embed = discord.Embed(title='-- Roll command help --', color=discord.Color(65535))
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None or user['color'] == None:
+        embed = discord.Embed(title='-- Roll command help --')
+    else:
+        embed = discord.Embed(title='-- Roll command help --', color=color_dict[user['color']])
+
     embed.add_field(name='Simple die rolls', value='Enter .roll XdY\n- example: .roll 2d20 will roll 2 20 sided dice', inline=False)
     embed.add_field(name='Modified rolls', value='Enter .roll XdY(+/-)number\n- example: .roll 3d4+5 will roll 3 4 sided dice, and then add 5 to each result', inline=False)
     embed.add_field(name='Character rolls', value='Enter .roll stat\n- example: .roll initiative will roll a 20 sided die and add your initiative modifier to the result\n\nFor saving throws, enter the first 3 letters of the associated stat, followed by save\n- example: .roll consave will roll a constitution saving throw\n\nFor skills/abilities, enter the name of the stat you want to roll, ignoring spaces\n- example: .roll animalhandling will roll an animal handling check', inline=False)
@@ -211,19 +231,19 @@ async def rollhelp(ctx):
 
     await ctx.channel.send(embed=embed)
 
+
 @bot.command()
 async def clear(ctx, num):
 
     if ctx.message.author.id != 391638053367840771:
         return
 
-    await ctx.channel.purge(limit=1)
-
     num = int(num)
 
     await ctx.channel.purge(limit=num)
 
     return
+
 
 @bot.command()
 async def upload(ctx):
@@ -273,26 +293,79 @@ async def upload(ctx):
 
     return
 
+
 @bot.command()
 async def uploadhelp(ctx):
 
     await ctx.channel.purge(limit=1)
 
-    embed = discord.Embed(title='-- Upload command help --', color=discord.Color(65535))
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None or user['color'] == None:
+        embed = discord.Embed(title='-- Upload command help --')
+    else:
+        embed = discord.Embed(title='-- Upload command help --', color=color_dict[user['color']])
+
     embed.add_field(name='Instructions', value=('1. Character sheet must be the official Wizards of the Coast 5e fillable pdf:\n' + 'https://media.wizards.com/2016/dnd/downloads/5E_CharacterSheet_Fillable.pdf' + '\n2.  Upload your character sheet to Discord\n3.  When Discord asks you for a comment before sending, enter .upload\n\n'), inline=False  )
     embed.add_field(name='Requirements', value=('\n- Character name,stat modifiers, initiative, saving throws, and skills must all be filled on the character sheet\n- Every filled modifier must contain a + or - before its value'), inline=False)
     embed.add_field(name='If upload is successful:', value='A message will be sent to confirm!', inline=False)
     await ctx.channel.send(embed=embed)
 
 
+@bot.command()
+async def color(ctx, message):
+    
+    await ctx.channel.purge(limit=1) # delete input message
+    
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)}) # find user_id
 
+    # if user not in system
+    if user == None:
+
+        # create entry
+        dict1 = {}
+        
+        # assign id
+        dict1['_id'] = str(ctx.author.id)
+        # assign color
+        if message in color_dict:
+            dict1['color'] = message
+            await ctx.send(ctx.author.mention + '\nYour bot messages will now be ' + message + '!')
+        else:
+            await ctx.send(ctx.author.mention + '\nInvalid color option! Try a different color!')
+            return
+
+        
+        characters.insert_one(dict1) # upload entry
+
+    # user in system
+    else:
+
+        if message in color_dict:
+            dict1 = user
+            dict1['color'] = message
+            characters.remove(spec_or_id=dict1['_id'])
+            characters.insert_one(dict1)
+            await ctx.send(ctx.author.mention + '\nYour bot messages will now be ' + message + '!')
+        else:
+            await ctx.send(ctx.author.mention + '\nInvalid color option! Try a different color!')
+            return        
 
 
 @bot.command()
 async def colorhelp(ctx):
+
+    await ctx.channel.purge(limit=1)
+
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None or user['color'] == None:
+        embed = discord.Embed(title='-- Color command help --')
+    else:
+        embed = discord.Embed(title='-- Color command help --', color=color_dict[user['color']])
     
-    embed = discord.Embed(title='-- Color command help --', color=discord.Color(65535))
-    embed.add_field(name='Instructions', value='1. Enter .color\n2. Wait for bot to send another message\n3. Click the reaction with the color that you want the bot messages to change to', inline=False)
+    embed.add_field(name='Instructions', value='1.  Enter .color _______\n- example: .color purple\n2.  Wait for bot to send another message to confirm your selection', inline=False)
+    embed.add_field(name='Available colors', value='- red\n- orange\n- green\n- blue\n- purple\n- gold\n- blurple\n- greyple\n- magenta\n- teal\n- black', inline=False)
     
     await ctx.send(embed=embed)
 
@@ -302,11 +375,18 @@ async def help(ctx):
 
     await ctx.channel.purge(limit=1)
 
-    embed = discord.Embed(title='-- Available commands --', color=discord.Color(65535))
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    if user == None or user['color'] == None:
+        embed = discord.Embed(title='-- Available commands --')
+    else:
+        embed = discord.Embed(title='-- Available commands --', color=color_dict[user['color']])
+
     embed.add_field(name='.roll', value='Rolls dice', inline=False)
     embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats', inline=False)
-    embed.add_field(name='.commandhelp', value='Replace \'command\' with the name of the command you want to learn about\n- example: .rollhelp', inline=False)
-
+    embed.add_field(name='.color', value='Changes the color that your bot messages will be sent in', inline=False)
+    embed.add_field(name='For more information on a specific command', value='Enter ._____help\n- example: .rollhelp will show you more information about the roll command', inline=False)
+    
     await ctx.channel.send(embed=embed)
 
 keep_alive()
