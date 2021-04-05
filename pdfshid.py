@@ -1,6 +1,8 @@
-import pymongo
 import json
 import os
+
+import pymongo
+
 
 # opens character sheet
 def fileOpen (filename): # opens the entered file name
@@ -13,7 +15,7 @@ def filter(my_str, sub):
     return my_str[index:]
 
 # connects and uploads info from text doc to mongodb
-def uploadSheet(text_doc):
+def uploadSheet(text_doc, user_id):
     
     client = pymongo.MongoClient("mongodb+srv://mongobot:k495fAouRy802H5K@cluster0.wucup.mongodb.net/test?retryWrites=true&w=majority")
 
@@ -29,7 +31,15 @@ def uploadSheet(text_doc):
             attribute, value = line.strip().split()
             dict1[attribute] = value.strip()
 
+    user = db.characters.find_one({'_id':str(user_id)})
+
+    color = user['color']
+
+    dict1['color'] = color
+
     characters.remove(spec_or_id=dict1['_id'])
+
+    # keep user color, if available
 
     characters.insert_one(dict1)
 
@@ -57,6 +67,25 @@ def fillSheet(input_file, user_id):
     out_file = open(filename, 'w')
 
     out_file.write('_id ' + str(user_id) + '\n')
+
+    out_file.write('name ' + matched_line + '\n')
+
+    substring = 'Initiative)/Type/Annot/V(' # get initiative mod
+
+    matched_line = ''
+
+    for line in input_file:
+        if substring in line:
+            matched_line = line
+            break
+
+    matched_line = filter(matched_line, substring)
+
+    matched_line = matched_line.replace(substring, '')
+
+    matched_line = matched_line.replace(')>>\n', '')
+
+    out_file.write('initiative ' + matched_line + '\n')
 
     substring = 'STRmod)/Type/Annot/V(' # get STR mod
 
@@ -177,7 +206,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('ssave ' + matched_line + '\n')
+    out_file.write('strsave ' + matched_line + '\n')
 
     substring = 'ST Dexterity)/Type/Annot/V(' # get DEX save
 
@@ -194,7 +223,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('dsave ' + matched_line + '\n')
+    out_file.write('dexsave ' + matched_line + '\n')
 
     substring = 'ST Constitution)/Type/Annot/V(' # get CON save
 
@@ -211,7 +240,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('csave ' + matched_line + '\n')
+    out_file.write('consave ' + matched_line + '\n')
 
     substring = 'ST Intelligence)/Type/Annot/V(' # get INT save
 
@@ -228,7 +257,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('isave ' + matched_line + '\n')
+    out_file.write('intsave ' + matched_line + '\n')
 
     substring = 'ST Wisdom)/Type/Annot/V(' # get WIS save
 
@@ -245,7 +274,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('wsave ' + matched_line + '\n')
+    out_file.write('wissave ' + matched_line + '\n')
 
     substring = 'ST Charisma)/Type/Annot/V(' # get CHA save
 
@@ -262,7 +291,7 @@ def fillSheet(input_file, user_id):
 
     matched_line = matched_line.replace(')>>\n', '')
 
-    out_file.write('csave ' + matched_line + '\n')
+    out_file.write('chasave ' + matched_line + '\n')
 
     input_file.seek(0)
 
@@ -586,7 +615,7 @@ def fillSheet(input_file, user_id):
 
     again = open(filename, 'r')
 
-    uploadSheet(again)
+    uploadSheet(again, user_id)
 
     again.close()
 
