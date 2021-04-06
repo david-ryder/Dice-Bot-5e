@@ -26,16 +26,109 @@ characters = db.characters
 color_dict = {
     'red': discord.Color.red(),
     'orange': discord.Color.orange(),
+    'yellow': discord.Color.gold(),
     'green': discord.Color.green(),
-    'blue': discord.Color.blue(),
-    'purple': discord.Color.purple(),
-    'gold': discord.Color.gold(),
-    'blurple': discord.Color.blurple(),
-    'gray': discord.Color.greyple(),
-    'magenta': discord.Color.magenta(),
     'teal': discord.Color.teal(),
+    'blue': discord.Color.blue(),
+    'blurple': discord.Color.blurple(),
+    'purple': discord.Color.purple(),
+    'pink': discord.Color.magenta(),
+    'white': discord.Color.greyple(),
     'black': discord.Color.default()
 }
+
+class Weapon:
+        def __init__(self, modifier, damage, type):
+            self.modifier = modifier
+            self.damage = damage
+            self.type = type
+
+# simple weapons
+club = Weapon('strength', '1d4', 'bludgeoning')
+dagger = Weapon('finesse', '1d4', 'piercing')
+greatclub = Weapon('strength', '1d8', 'bludgeoning')
+handaxe = Weapon('strength', '1d6', 'slashing')
+javeline = Weapon('strength', '1d6', 'piercing')
+lighthammer = Weapon('strength', '1d4', 'bludgeoning')
+mace = Weapon('strength', '1d6', 'bludgeoning')
+quarterstaff = Weapon('strength', '1d6', 'bludgeoning')
+sickle = Weapon('strength', '1d4', 'slashing')
+spear = Weapon('strength', '1d6', 'piercing')
+
+# simple ranged weapons
+lightcrossbow = Weapon('dexterity', '1d8', 'piercing')
+dart = Weapon('finesse', '1d4', 'piercing')
+shortbow = Weapon('dexterity', '1d6', 'piercing')
+sling = Weapon('dexterity', '1d4', 'piercing')
+
+# martial weapons
+battleaxe = Weapon('strength', '1d8', 'slashing')
+flail = Weapon('strength', '1d8', 'bludgeoning')
+glaive = Weapon('strength', '1d10', 'slashing')
+greataxe = Weapon('strength', '1d12', 'slashing')
+greatsword = Weapon('strength', '2d6', 'slashing')
+halberd = Weapon('strength', '1d10', 'slashing')
+lance = Weapon('strength', '1d12', 'piercing')
+longsword = Weapon('strength', '1d8', 'slashing')
+maul = Weapon('strength', '2d8', 'bludgeoning')
+morningstar = Weapon('strength', '1d8', 'piercing')
+pike = Weapon('strength', '1d10', 'piercing')
+rapier = Weapon('finesse', '1d8', 'piercing')
+scimitar = Weapon('finesse', '1d6', 'slashing')
+shortsword = Weapon('finesse', '1d6', 'piercing')
+trident = Weapon('strength', '1d6', 'piercing')
+warpick = Weapon('strength', '1d8', 'piercing')
+warhammer = Weapon('strength', '1d8', 'bludgeoning')
+whip = Weapon('finesse', '1d4', 'slashing')
+
+# martial ranged weapons
+blowgun = Weapon('dexterity', '1d1', 'piercing')
+handcrossbow = Weapon('dexterity', '1d6', 'piercing')
+heavycrossbow = Weapon('dexterity', '1d10', 'piercing')
+longbow = Weapon('dexterity', '1d8', 'piercing')
+net = Weapon('dexterity', '1d0', 'net')
+
+
+toolrack = {}
+
+toolrack['club'] = club
+toolrack['dagger'] = dagger
+toolrack['greatclub'] = greatclub
+toolrack['handaxe'] = handaxe
+toolrack['javeline'] = javeline
+toolrack['lighthammer'] = lighthammer
+toolrack['mace'] = mace
+toolrack['quarterstaff'] = quarterstaff
+toolrack['sickle'] = sickle
+toolrack['spear'] = spear
+toolrack['lightcrossbow'] = lightcrossbow
+toolrack['dart'] = dart
+toolrack['shortbow'] = shortbow
+toolrack['sling'] = sling
+toolrack['battleaxe'] = battleaxe
+toolrack['flail'] = flail
+toolrack['glaive'] = glaive
+toolrack['greataxe'] = greataxe
+toolrack['greatsword'] = greatsword
+toolrack['halberd'] = halberd
+toolrack['lance'] = lance
+toolrack['longsword'] = longsword
+toolrack['maul'] = maul
+toolrack['morningstar'] = morningstar
+toolrack['pike'] = pike
+toolrack['rapier'] = rapier
+toolrack['scimitar'] = scimitar
+toolrack['shortsword'] = shortsword
+toolrack['trident'] = trident
+toolrack['warpick'] = warpick
+toolrack['warhammer'] = warhammer
+toolrack['whip'] = whip
+toolrack['blowgun'] = blowgun
+toolrack['handcrossbow'] = handcrossbow
+toolrack['heavycrossbow'] = heavycrossbow
+toolrack['longbow'] = longbow
+toolrack['net'] = net 
+
 
 @bot.event
 async def on_ready():
@@ -126,7 +219,7 @@ async def roll(ctx, message):
 
             final_message += ')'
         
-        embed.add_field(name='Result', value=final_message)
+        embed.add_field(name='Result:', value=final_message)
 
         await ctx.channel.send(embed=embed)
         
@@ -213,14 +306,14 @@ async def roll(ctx, message):
             final_message += '***'
         final_message += ' '
     
-    embed.add_field(name=('Result'), value=final_message, inline=False)
+    embed.add_field(name=('Result:'), value=final_message, inline=False)
     
     total = 0
 
     for x in range(int(num_rolls)): # calculate the total die roll
         total += arr[x]
 
-    embed.add_field(name='Total', value=str(total))
+    embed.add_field(name='Total:', value=str(total))
 
     await ctx.send(embed=embed) # send final message
 
@@ -378,9 +471,146 @@ async def colorhelp(ctx):
         embed = discord.Embed(title='-- Color command help --', color=color_dict[user['color']])
     
     embed.add_field(name='Instructions', value='1.  Enter .color _______\n- example: .color purple\n2.  Wait for bot to send another message to confirm your selection', inline=False)
-    embed.add_field(name='Available colors', value='- red\n- orange\n- green\n- blue\n- purple\n- gold\n- blurple\n- greyple\n- magenta\n- teal\n- black', inline=False)
+    embed.add_field(name='Available colors', value='- red\n- orange\n- yellow\n- green\n- teal\n- blue\n- blurple\n- purple\n- magenta\n- white\n- black', inline=False)
     
     await ctx.send(embed=embed)
+
+
+@bot.command()
+async def me(ctx):
+    
+    # delete function call
+    await ctx.channel.purge(limit=1)
+
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+    
+    # check if user is in system
+    try:
+        user_id = user['_id']
+    except:
+        await ctx.send(ctx.author.mention + '\nWho are you? You have no records!')
+        return
+    
+    if user == None or user['color'] == None:
+        embed = discord.Embed(title='All information on:')
+    else:
+        embed = discord.Embed(title='All information on:', color=color_dict[user['color']])
+
+    message = (str(user)).replace(',', '\n').replace('\'', '').replace('{', '').replace('}', '').replace('name', 'charactername')
+    embed.add_field(name=ctx.author.name, value=message)
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def attack(ctx, message):
+
+    # delete function call
+    await ctx.channel.purge(limit=1)
+
+    # get user
+    user = db.characters.find_one({'_id':str(ctx.message.author.id)})
+
+    # does user have a character sheet
+    try:
+       strength = user['strength']
+       dexterity = user['dexterity']
+       name = user['name']
+    except:
+        await ctx.send(ctx.author.mention + '\nWhoops! You need to upload a character sheet before you can make attack rolls!')
+        return
+
+    try:
+        color = color_dict[user['color']]
+    except:
+        color = color_dict['black']
+    
+    # is user's message in the toolrack
+    if message in toolrack:
+        
+        embed = discord.Embed(title=('-- ' + name + ' attacks with ' + message + ' --'), color=color)
+
+        crit1 = False
+        crit2 = False
+
+        roll1 = random.randint(1,20)
+        if roll1 == 1 or roll1 == 20:
+            crit1 = True
+
+        roll2 = random.randint(1,20)
+        if roll2 == 1 or roll2 == 20:
+            crit2 = True
+
+        weapon = toolrack[message]
+        bonus = weapon.modifier
+
+        if bonus == 'finesse':
+            if user['strength'] > user['dexterity']:
+                bonus = 'strength'
+            else:
+                bonus = 'dexterity'
+
+
+        if '+' in user[bonus]:
+            roll1 += int(user[bonus].replace('+', ''))
+            roll2 += int(user[bonus].replace('+', ''))
+
+        if '-' in user[bonus]:
+            roll1 -= int(user[bonus].replace('-', ''))
+            roll2 -= int(user[bonus].replace('-', ''))
+
+        message = '('
+
+        if crit1:
+            message += '***' + str(roll1) + '***, '
+        else:
+            message += str(roll1) + ','
+
+        if crit2:
+            message += '***' + str(roll2) + '***)'
+        else:
+            message += str(roll2) + ')'
+
+        # get string from weapon description
+        string = weapon.damage
+
+        new_message = '('
+
+        total = 0
+
+        if len(string) <= 3:
+            try:
+                # loop for number of dice to roll
+                for x in range(int(string[0])):
+                    total += random.randint(1, int(string[2]))
+
+                if '+' in user[bonus]:
+                    total += int(user[bonus].replace('+', ''))
+
+                if '-' in user[bonus]:
+                    total -= int(user[bonus].replace('-', ''))
+            except:
+                total = 0
+        else:
+            try:
+                # loop for number of dice to roll
+                for x in range(int(string[0])):
+                    total += random.randint(1, int(string[2] + string[3]))
+
+                if '+' in user[bonus]:
+                    total += int(user[bonus].replace('+', ''))
+
+                if '-' in user[bonus]:
+                    total -= int(user[bonus].replace('-', ''))
+            except:
+                total = 0
+
+
+        new_message += str(total) + ')'
+
+        embed.add_field(name='To hit:', value=message)
+        embed.add_field(name=(weapon.type.capitalize() + ' damage:'), value=new_message, inline=False)
+
+        await ctx.send(embed=embed)
 
 
 @bot.command()
@@ -395,12 +625,13 @@ async def help(ctx):
     else:
         embed = discord.Embed(title='-- Available commands --', color=color_dict[user['color']])
 
-    embed.add_field(name='.roll', value='Rolls dice', inline=False)
-    embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats', inline=False)
-    embed.add_field(name='.color', value='Changes the color that your bot messages will be sent in', inline=False)
-    embed.add_field(name='For more information on a specific command', value='Enter ._____help\n- example: .rollhelp will show you more information about the roll command', inline=False)
+    embed.add_field(name='.roll', value='Rolls dice in XdY format, or rolls dice straight from character sheet\n.rollhelp for more info', inline=False)
+    embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats\n.uploadhelp for more info', inline=False)
+    embed.add_field(name='.color', value='Changes the color that your bot messages will be sent in\n.colorhelp for more info', inline=False)
+    embed.add_field(name='.me', value='Sends message containing all character info, and other bot-related info', inline=False)
     
     await ctx.channel.send(embed=embed)
+
 
 keep_alive()
 
