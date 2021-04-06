@@ -168,53 +168,98 @@ async def roll(ctx, message):
 
         final_message = '('
 
+        crit1 = False
+        crit2 = False
+
+        roll1 = random.randint(1,20)
+        if roll1 == 1 or roll1 == 20:
+          crit1 = True
+
+        roll2 = random.randint(1,20)
+        if roll2 == 1 or roll2 == 20:
+          crit2 = True
+
+
+
         if '+' in stat:
             index = stat.find('+')
 
-            result = random.randint(1,20)
+            total1 = roll1 + int(stat[index:])
 
-            total = result + int(stat[index:])
-
-            if result == 20 or result == 1:
+            if crit1:
                 final_message += '***'
 
-            final_message += str(total)
+            final_message += str(total1)
 
-            if result == 20 or result == 1:
+            if crit1:
+                final_message += '***'
+
+            final_message += ', '
+
+            total2 = roll2 + int(stat[index:])
+
+            if crit2:
+                final_message += '***'
+
+            final_message += str(total2)
+
+            if crit2:
                 final_message += '***'
 
             final_message += ')'
 
         elif '-' in stat:
             index = stat.find('-')
-
-            result = random.randint(1,20)
             
             subtraction = 0 - int(stat[index:])
 
-            total = result - subtraction
+            total1 = roll1 - subtraction
 
-            if result == 20 or result == 1:
+            if crit1:
                 final_message += '***'
 
-            final_message += str(total)
+            final_message += str(total1)
 
-            if result == 20 or result == 1:
+            if crit1:
                 final_message += '***'
-                
+
+            final_message += ', '
+
+            total1 = roll2 - subtraction
+
+            if crit2:
+                final_message += '***'
+
+            final_message += str(total2)
+
+            if crit2:
+                final_message += '***'
+
             final_message += ')'
 
         else:
             result = random.randint(1,20)
 
-            total = result
+            total1 = roll1
 
-            if result == 20 or result == 1:
+            if crit1:
                 final_message += '***'
 
-            final_message += str(total)
+            final_message += str(total1)
 
-            if result == 20 or result == 1:
+            if crit1:
+                final_message += '***'
+
+            final_message += ', '
+
+            total2 = roll2
+
+            if crit2:
+                final_message += '***'
+
+            final_message += str(total2)
+
+            if crit2:
                 final_message += '***'
 
             final_message += ')'
@@ -627,6 +672,7 @@ async def help(ctx):
 
     embed.add_field(name='.roll', value='Rolls dice in XdY format, or rolls dice straight from character sheet\n.rollhelp for more info', inline=False)
     embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats\n.uploadhelp for more info', inline=False)
+    embed.add_field(name='.attack', value='Makes an attack roll using stats from your character sheet\nEnter .attack weaponname to make an attack with a weapon\n- example: .attack longsword to attack with a longsword')
     embed.add_field(name='.color', value='Changes the color that your bot messages will be sent in\n.colorhelp for more info', inline=False)
     embed.add_field(name='.me', value='Sends message containing all character info, and other bot-related info', inline=False)
     
