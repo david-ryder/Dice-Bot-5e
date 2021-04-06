@@ -24,15 +24,14 @@ db = client.dndbot
 characters = db.characters
 
 color_dict = {
-    'red': discord.Color.red(),
-    'orange': discord.Color.orange(),
-    'yellow': discord.Color.gold(),
-    'green': discord.Color.green(),
+    'red': discord.Color(16711680),
+    'orange': discord.Color(16744192),
+    'yellow': discord.Color(16641536),
+    'green': discord.Color(65280),
     'teal': discord.Color.teal(),
-    'blue': discord.Color.blue(),
-    'blurple': discord.Color.blurple(),
-    'purple': discord.Color.purple(),
-    'pink': discord.Color.magenta(),
+    'blue': discord.Color(149502),
+    'purple': discord.Color(10494192),
+    'pink': discord.Color(16352485),
     'white': discord.Color.greyple(),
     'black': discord.Color.default()
 }
@@ -515,33 +514,39 @@ async def colorhelp(ctx):
         embed = discord.Embed(title='-- Color command help --', color=color_dict[user['color']])
     
     embed.add_field(name='Instructions', value='1.  Enter .color _______\n- example: .color purple\n2.  Wait for bot to send another message to confirm your selection', inline=False)
-    embed.add_field(name='Available colors', value='- red\n- orange\n- yellow\n- green\n- teal\n- blue\n- blurple\n- purple\n- magenta\n- white\n- black', inline=False)
+    embed.add_field(name='Available colors', value='- red\n- orange\n- yellow\n- green\n- teal\n- blue\n- purple\n- pink\n- white\n- black', inline=False)
     
     await ctx.send(embed=embed)
 
 
 @bot.command()
-async def me(ctx):
+async def mysheet(ctx):
     
     # delete function call
     await ctx.channel.purge(limit=1)
 
     user = db.characters.find_one({'_id':str(ctx.message.author.id)})
     
-    # check if user is in system
+    # check if user has sheet in system
     try:
-        user_id = user['_id']
+        user_test = user['strength']
     except:
-        await ctx.send(ctx.author.mention + '\nWho are you? You have no records!')
+        await ctx.send(ctx.author.mention + '\nWhoops! You need to upload a character sheet before you can do tha!')
         return
     
     if user == None or user['color'] == None:
-        embed = discord.Embed(title='All information on:')
+        embed = discord.Embed(title='Character sheet for:')
     else:
-        embed = discord.Embed(title='All information on:', color=color_dict[user['color']])
+        embed = discord.Embed(title='Character sheet for:', color=color_dict[user['color']])
 
-    message = (str(user)).replace(',', '\n').replace('\'', '').replace('{', '').replace('}', '').replace('name', 'charactername')
-    embed.add_field(name=ctx.author.name, value=message)
+    tempdict = user
+    tempdict.pop('_id')
+    tempdict.pop('color')
+    charactername = tempdict['name']
+    tempdict.pop('name')
+
+    message = (str(tempdict)).replace(',', '\n').replace('\'', '').replace('{', '').replace('}', '')
+    embed.add_field(name=charactername, value=message)
     await ctx.send(embed=embed)
 
 
@@ -652,9 +657,11 @@ async def attack(ctx, message):
         new_message += str(total) + ')'
 
         embed.add_field(name='To hit:', value=message)
-        embed.add_field(name=(weapon.type.capitalize() + ' damage:'), value=new_message, inline=False)
+        embed.add_field(name=(weapon.damage + user[bonus] + ' ' + weapon.type + ' damage:'), value=new_message, inline=False)
 
         await ctx.send(embed=embed)
+    else:
+      await ctx.send(ctx.author.mention + '\nWhoops! That was an invalid weapon name! Try again!')
 
 
 @bot.command()
@@ -672,8 +679,8 @@ async def help(ctx):
     embed.add_field(name='.roll', value='Rolls dice in XdY format, or rolls dice straight from character sheet\n.rollhelp for more info', inline=False)
     embed.add_field(name='.upload', value='Uploads character sheet so .roll command can use your character\'s stats\n.uploadhelp for more info', inline=False)
     embed.add_field(name='.attack', value='Makes an attack roll using stats from your character sheet\nEnter .attack weaponname to make an attack with a weapon\n- example: .attack longsword to attack with a longsword')
+    embed.add_field(name='.mysheet', value='Sends message containing all of your character\'s stats', inline=False)
     embed.add_field(name='.color', value='Changes the color that your bot messages will be sent in\n.colorhelp for more info', inline=False)
-    embed.add_field(name='.me', value='Sends message containing all character info, and other bot-related info', inline=False)
     
     await ctx.channel.send(embed=embed)
 
