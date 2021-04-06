@@ -238,7 +238,6 @@ async def roll(ctx, message):
             final_message += ')'
 
         else:
-            result = random.randint(1,20)
 
             total1 = roll1
 
@@ -377,7 +376,7 @@ async def rollhelp(ctx):
 
     embed.add_field(name='Simple die rolls', value='Enter .roll XdY\n- example: .roll 2d20 will roll 2 20 sided dice', inline=False)
     embed.add_field(name='Modified rolls', value='Enter .roll XdY(+/-)number\n- example: .roll 3d4+5 will roll 3 4 sided dice, and then add 5 to each result', inline=False)
-    embed.add_field(name='Character rolls', value='Enter .roll stat\n- example: .roll initiative will roll a 20 sided die and add your initiative modifier to the result\n\nFor saving throws, enter the first 3 letters of the associated stat, followed by save\n- example: .roll consave will roll a constitution saving throw\n\nFor skills/abilities, enter the name of the stat you want to roll, ignoring spaces\n- example: .roll animalhandling will roll an animal handling check', inline=False)
+    embed.add_field(name='Character rolls', value='Enter .roll stat\n- example: .roll initiative will roll an initiative check at advantage\n\nFor saving throws, enter the first 3 letters of the associated stat, followed by save\n- example: .roll consave will roll a constitution saving throw at advantage\n\nFor skills/abilities, enter the name of the stat you want to roll, ignoring spaces\n- example: .roll animalhandling will roll an animal handling check at advantage', inline=False)
     embed.add_field(name='Critical success/failures', value='These values will be bolded')
 
     await ctx.channel.send(embed=embed)
