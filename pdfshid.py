@@ -28,12 +28,19 @@ def uploadSheet(text_doc, user_id):
     # converts text_doc to a json file
     with text_doc as f:
         for line in f:
+            if 'name' in line:
+              attribute = line.replace('name ', '').replace('\n', '')
+              dict1['name'] = attribute
+              continue
             attribute, value = line.strip().split()
             dict1[attribute] = value.strip()
 
     user = db.characters.find_one({'_id':str(user_id)})
 
-    color = user['color']
+    try:
+      color = user['color']
+    except TypeError:
+      color = 'black'
 
     dict1['color'] = color
 
